@@ -1,0 +1,66 @@
+﻿@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <title>Index</title>
+    <script src="~/jquery-1.4.2.min.js"></script>
+    <style type="text/css">
+        .textArea {
+            width: 100%;
+            height: 30px;
+        }
+    </style>
+</head>
+<body>
+    <input type="button" id="biandAButton" value="绑定第一组数据" />
+    <div>第一组数据对象嵌套数组（成功显示则绑定成功）</div>
+    <textarea id="BandA" class="textArea"></textarea>
+    <br />
+    <input type="button" id="bianBButton" value="绑定第二组数据" />
+    <div>第二组数据直接绑定数组（成功显示则绑定成功）</div>
+    <textarea id="BandB" class="textArea"></textarea>
+
+    <br />
+    <input type="button" id="bianCButton" value="绑定第三组数据" />
+    <div>第三组数据多对象嵌套(成功显示则绑定成功）</div>
+    <textarea id="BandC" class="textArea"></textarea>
+</body>
+</html>
+<script type="text/javascript">
+    $(function () {
+        //对象嵌套数组绑定模式
+        $("#biandAButton").click(function () {
+            BindA("@Url.Action("ABind")", { ClassesName: "1年级一班", StudentCount: 1, Students: [{ StuedentName: "小明", Age: 15 }, { StuedentName: "方", Age: 18 }] },"BandA")
+        })
+
+        //多数组
+        $("#bianBButton").click(function () {
+            BindA("@Url.Action("BBind")", { classes: [{ ClassesName: "1年级一班", StudentCount: 1, Students: [{ StuedentName: "小明", Age: 15 }, { StuedentName: "方", Age: 18 }] }] }, "BandB")
+        })
+
+        //对象嵌套
+        $("#bianCButton").click(function () {
+            BindA("@Url.Action("CBind")", { Teacher:{TeacheName:"李老师"},ClassesName: "1年级一班", StudentCount: 1, Students: [{ StuedentName: "小明", Age: 15 }, { StuedentName: "方", Age: 18 }] }, "BandC")
+        })
+
+       
+    })
+    function BindA(url, data, outDomid) {
+         
+        $.ajax({
+            type: "POST",
+            url:url,
+            data: data,
+            dataType: "text",
+            success: function (ajadata) {
+                console.log(ajadata);
+                $("#"+outDomid).val(ajadata);
+        }
+    });
+    }
+</script>
