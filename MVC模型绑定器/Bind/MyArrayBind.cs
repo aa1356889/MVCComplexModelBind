@@ -8,7 +8,7 @@ using System.Web.Mvc;
 
 namespace MVC模型绑定器.Bind
 {
-    /// <summary>
+     /// <summary>
     /// MVC复杂类型绑定
     /// <UpdateDate>2016-5-27</UpdateDate>
     /// <Author>李强</Author>
@@ -42,33 +42,43 @@ namespace MVC模型绑定器.Bind
                 listType = listType.MakeGenericType(elemetType);//定义反射集合的储存类型
                 object list = Activator.CreateInstance(listType);//创建该集合
                 bool isValue = false;//用于判断是否进行第二次值提供器查找
-                for (int i = 0; true; i++)
+                if (elemetType == typeof(string))
                 {
-                    var obj = Activator.CreateInstance(elemetType);
-                    foreach (var property in propertys)
-                    {
-                        var valuekey=  key + "[" + i + "]" + "[" + property.Name + "]";
-                          var propertype = property.PropertyType;
-                          if (propertype.IsArray)
-                        {
-                            valuekey = key + "[" + i + "]" + "[" + property.Name + "]";
-                            property.SetValue(obj, BindingArray(propertype, valuekey));
-                            
-                        }
-
-                          var bb = bindingContext.ValueProvider.GetValue(valuekey);
-                        if (bb != null)
-                        {
-                            property.SetValue(obj, Convert.ChangeType(bb.AttemptedValue, property.PropertyType));
-                            isValue = true;//代表找到有值
-                        }
+                    var value= bindingContext.ValueProvider.GetValue(key+"[]");
+                    if (value != null) {
+                        return value.RawValue;
                     }
-                    if (!isValue) break;//如果以上没有成功绑定一次则表示值提供器没有值了 遍历到尾部了 结束循环
-                    isValue = false;
-                    //每次绑定的数据存入集合
-                    method = listType.GetMethod("Add");
-                    method.Invoke(list, new object[] { obj });
-               
+                }
+                else
+                {
+                    for (int i = 0; true; i++)
+                    {
+                        var obj = Activator.CreateInstance(elemetType);
+                        foreach (var property in propertys)
+                        {
+                            var valuekey = key + "[" + i + "]" + "[" + property.Name + "]";
+                            var propertype = property.PropertyType;
+                            if (propertype.IsArray)
+                            {
+                                valuekey = key + "[" + i + "]" + "[" + property.Name + "]";
+                                property.SetValue(obj, BindingArray(propertype, valuekey));
+
+                            }
+
+                            var bb = bindingContext.ValueProvider.GetValue(valuekey);
+                            if (bb != null)
+                            {
+                                property.SetValue(obj, Convert.ChangeType(bb.AttemptedValue, property.PropertyType));
+                                isValue = true;//代表找到有值
+                            }
+                        }
+                        if (!isValue) break;//如果以上没有成功绑定一次则表示值提供器没有值了 遍历到尾部了 结束循环
+                        isValue = false;
+                        //每次绑定的数据存入集合
+                        method = listType.GetMethod("Add");
+                        method.Invoke(list, new object[] { obj });
+
+                    }
                 }
                 //将集合转换为数组返回
                 method = listType.GetMethod("ToArray");
@@ -138,5 +148,6 @@ namespace MVC模型绑定器.Bind
             }
           
         }
+    }
     }
 }
